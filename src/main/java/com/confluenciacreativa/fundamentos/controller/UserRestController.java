@@ -5,6 +5,8 @@ import com.confluenciacreativa.fundamentos.caseuse.DeleteUser;
 import com.confluenciacreativa.fundamentos.caseuse.GetUser;
 import com.confluenciacreativa.fundamentos.caseuse.UpdateUser;
 import com.confluenciacreativa.fundamentos.entity.User;
+import com.confluenciacreativa.fundamentos.repository.UserRepository;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -20,15 +22,18 @@ public class UserRestController {
     private CreateUser createUser;
     private DeleteUser deleteUser;
     private UpdateUser updateUser;
+    private UserRepository userRepository;
 
     public UserRestController(GetUser getUser,
                               CreateUser createUser,
                               DeleteUser deleteUser,
-                              UpdateUser updateUser) {
+                              UpdateUser updateUser,
+                              UserRepository userRepository) {
         this.getUser = getUser;
         this.createUser = createUser;
         this.deleteUser = deleteUser;
         this.updateUser = updateUser;
+        this.userRepository = userRepository;
     }
 
     @GetMapping("/")
@@ -50,5 +55,10 @@ public class UserRestController {
     @PutMapping("/{id}")
     ResponseEntity<User> replaceUser(@RequestBody User newUser, @PathVariable Long id){
         return new ResponseEntity<> (updateUser.update(newUser, id), HttpStatus.OK);
+    }
+
+    @GetMapping("/pageable")
+    List<User> getUserPageable(@RequestParam int page, @RequestParam int size){
+        return userRepository.findAll(PageRequest.of(page,size)).getContent();
     }
 }
